@@ -5,13 +5,6 @@
 #include <string>
 #include <vector>
 
-const std::vector<char> bit_board_pieces{'P', 'K', 'Q', 'B', 'N', 'R',
-                                         'p', 'k', 'q', 'b', 'n', 'r'};
-
-const std::map<char, std::string> pieces{
-    {'k', "♔"}, {'q', "♕"}, {'r', "♖"}, {'b', "♗"}, {'n', "♘"}, {'p', "♙"},
-    {'K', "♚"}, {'Q', "♛"}, {'R', "♜"}, {'B', "♝"}, {'N', "♞"}, {'P', "♟"}};
-
 int main() {
   // std::string fen =
   //     "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";

@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+namespace utils {
+
 const std::vector<char> bit_board_pieces{'P', 'K', 'Q', 'B', 'N', 'R',
                                          'p', 'k', 'q', 'b', 'n', 'r'};
 
@@ -30,7 +32,8 @@ void printBoard(fen::board_t board) {
         continue;
       }
 
-      board_with_pieces[j] = pieces.at(bit_board_pieces[i]);
+      // board_with_pieces[j] = pieces.at(bit_board_pieces[i]);
+      board_with_pieces[j] = bit_board_pieces[i];
     }
   }
 
@@ -60,3 +63,4 @@ void printBoard(fen::board_t board) {
     std::cout << "|\n|";
   }
 }
+} // namespace utils
