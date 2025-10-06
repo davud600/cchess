@@ -1,56 +1,29 @@
 #pragma once
 
+#include "position.h"
 #include <array>
+#include <cstdint>
 #include <string>
 #include <utility>
 
 namespace fen {
 
-enum piece {
-  pawn = 'p',
-  king = 'k',
-  queen = 'q',
-  bishop = 'b',
-  knight = 'n',
-  rook = 'r',
-};
+position::ColoredPiece parseChar(char ch);
 
-enum color {
-  white = 0,
-  black = 6,
-};
+position::Board parseBoard(std::string fenBoard);
 
-using colored_piece_t = std::pair<piece, color>;
+position::Color parseActive(std::string fenActive);
 
-using bit_board_t = unsigned long long int; // 64 bit board.
+std::string parseCastling(std::string fenCastling);
 
-// arr of 12 64 bit boards (for each piece type and color).
-using board_t = std::array<bit_board_t, 12>;
+std::string parseEp(std::string fenEp);
 
-struct GameState {
-  board_t board;
-  color active;
-  std::string castling; // castling availability
-  std::string enps;     // en passant target square
-  unsigned int
-      halfmove_clock; // num of halfmoves since last capture or pawn advance
-  unsigned int fullmoves;
-};
+uint16_t parseHalfmoveclock(std::string fenHalfmoveClock);
 
-colored_piece_t parse_char(char ch);
+uint16_t parseFullmoves(std::string fenFullmoves);
 
-board_t parse_board(std::string fen_board);
+position::Position parse(std::string fen);
 
-color parse_active(std::string fen_active);
-
-std::string parse_castling(std::string fen_castling);
-
-std::string parse_enps(std::string fen_enps);
-
-unsigned int parse_halfmove_clock(std::string fen_halfmove_clock);
-
-unsigned int parse_fullmoves(std::string fen_fullmoves);
-
-GameState parse(std::string fen);
+std::string getFen(position::Position position);
 
 } // namespace fen

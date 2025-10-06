@@ -1,29 +1,45 @@
-#include "fen.h"
+#include "position.h"
 #include <array>
 #include <bitset>
+#include <cstdint>
 #include <iostream>
-#include <map>
 #include <string>
 #include <vector>
 
 namespace utils {
 
-const std::vector<char> bit_board_pieces{'P', 'K', 'Q', 'B', 'N', 'R',
+const std::vector<char> BIT_BOARD_PIECES{'P', 'K', 'Q', 'B', 'N', 'R',
                                          'p', 'k', 'q', 'b', 'n', 'r'};
 
-const std::map<char, std::string> pieces{
-    {'k', "♔"}, {'q', "♕"}, {'r', "♖"}, {'b', "♗"}, {'n', "♘"}, {'p', "♙"},
-    {'K', "♚"}, {'Q', "♛"}, {'R', "♜"}, {'B', "♝"}, {'N', "♞"}, {'P', "♟"}};
+void printBitBoard(uint64_t b) {
+  std::string binary = std::bitset<64>(b).to_string();
+  unsigned short int r;
+  unsigned short int f;
 
-// from bit board to user readable chess board.
+  for (r = 0; r < 8; r++) {
+    for (f = 7; f < 65535; f--) {
+      uint8_t idx = f + (r * 8);
+      std::cout << binary[idx];
+    }
+
+    if (r == 7) {
+      std::cout << "\n";
+      continue;
+    }
+
+    std::cout << "\n";
+  }
+};
+
+// from bit boards to user readable chess board.
 // NOTE: to be refactored...
-void printBoard(fen::board_t board) {
+void printBoard(position::Board board) {
   std::array<std::string, 64> board_with_pieces;
   unsigned short int i;
 
   for (i = 0; i < 12; i++) {
     unsigned short int j;
-    fen::bit_board_t b = board[i];
+    uint64_t b = board[i];
     std::string binary = std::bitset<64>(b).to_string();
     std::cout << binary << "\n";
 
@@ -32,8 +48,7 @@ void printBoard(fen::board_t board) {
         continue;
       }
 
-      // board_with_pieces[j] = pieces.at(bit_board_pieces[i]);
-      board_with_pieces[j] = bit_board_pieces[i];
+      board_with_pieces[j] = BIT_BOARD_PIECES[i];
     }
   }
 
@@ -63,4 +78,15 @@ void printBoard(fen::board_t board) {
     std::cout << "|\n|";
   }
 }
+
+void printPosition(position::Position postition) {
+  std::cout << "Active: "
+            << (postition.active == position::Color::White ? "w" : "b") << "\n";
+  std::cout << "Castling availability: " << postition.castling << "\n";
+  std::cout << "En passant target square: " << postition.ep << "\n";
+  std::cout << "Halfmove clock: " << postition.halfmoveClock << "\n";
+  std::cout << "Fullmoves: " << postition.fullmoves << "\n";
+  utils::printBoard(postition.board);
+};
+
 } // namespace utils

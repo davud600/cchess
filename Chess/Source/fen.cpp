@@ -1,6 +1,8 @@
 #include "fen.h"
+#include "position.h"
 #include <cctype>
 #include <cmath>
+#include <cstdint>
 #include <map>
 #include <sstream>
 #include <string>
@@ -8,31 +10,29 @@
 
 namespace fen {
 
-const std::map<char, unsigned short int> board_pieces{
-    {'p', 0}, {'k', 1}, {'q', 2}, {'b', 3}, {'n', 4}, {'r', 5}};
-
-colored_piece_t parse_char(char ch) {
-  colored_piece_t parsed;
-  parsed.second = tolower(ch) == ch ? color::black : color::white;
+position::ColoredPiece parseChar(char ch) {
+  position::ColoredPiece parsed;
+  parsed.second =
+      tolower(ch) == ch ? position::Color::Black : position::Color::White;
 
   switch (std::tolower(ch)) {
-  case piece::bishop:
-    parsed.first = piece::bishop;
+  case position::Piece::Bishop:
+    parsed.first = position::Piece::Bishop;
     break;
-  case piece::king:
-    parsed.first = piece::king;
+  case position::Piece::King:
+    parsed.first = position::Piece::King;
     break;
-  case piece::knight:
-    parsed.first = piece::knight;
+  case position::Piece::Knight:
+    parsed.first = position::Piece::Knight;
     break;
-  case piece::queen:
-    parsed.first = piece::queen;
+  case position::Piece::Queen:
+    parsed.first = position::Piece::Queen;
     break;
-  case piece::rook:
-    parsed.first = piece::rook;
+  case position::Piece::Rook:
+    parsed.first = position::Piece::Rook;
     break;
   default:
-    parsed.first = piece::pawn;
+    parsed.first = position::Piece::Pawn;
     break;
   }
 
@@ -45,10 +45,10 @@ colored_piece_t parse_char(char ch) {
  * bit board = 2^(file + (rank * 8))
  *
  */
-board_t parse_board(std::string fen_board) {
+position::Board parseBoard(std::string fen_board) {
   unsigned short int rank = 7;
   unsigned short int file = 0;
-  board_t board = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  position::Board board = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   for (char c : fen_board) {
     if (c == '/') {
@@ -60,8 +60,8 @@ board_t parse_board(std::string fen_board) {
       continue;
     };
 
-    colored_piece_t piece = parse_char(c);
-    unsigned short int board_idx = board_pieces.at(piece.first) + piece.second;
+    position::ColoredPiece piece = parseChar(c);
+    uint8_t board_idx = position::PIECE_INDEXES.at(piece.first) + piece.second;
 
     board[board_idx] += std::pow(2, file + (rank * 8));
     file += 1;
@@ -70,15 +70,16 @@ board_t parse_board(std::string fen_board) {
   return board;
 }
 
-color parse_active(std::string fen_active) {
-  return fen_active == "w" ? color::white : color::black;
+position::Color parseActive(std::string fenActive) {
+  return fenActive == "w" ? position::Color::White : position::Color::Black;
 };
 
-std::string parse_castling(std::string fen_castling) { return fen_castling; };
+std::string parseCastling(std::string fen_castling) { return fen_castling; };
 
-std::string parse_enps(std::string fen_enps) { return fen_enps; };
+// en passant
+std::string parseEp(std::string fen_enps) { return fen_enps; };
 
-unsigned int parse_halfmove_clock(std::string fen_halfmove_clock) {
+uint16_t parseHalfmoveClock(std::string fen_halfmove_clock) {
   char c = fen_halfmove_clock[0];
 
   if (std::isdigit(c)) {
@@ -88,34 +89,38 @@ unsigned int parse_halfmove_clock(std::string fen_halfmove_clock) {
   return 0;
 };
 
-unsigned int parse_fullmoves(std::string fen_fullmoves) {
+uint16_t parseFullmoves(std::string fen_fullmoves) {
   char c = fen_fullmoves[0];
 
   if (std::isdigit(c)) {
-    return int(c);
+    return c - '0';
   };
 
   return 0;
 };
 
-GameState parse(std::string fen) {
+position::Position parse(std::string fen) {
   std::vector<std::string> parts;
   std::istringstream iss(fen);
   std::string part;
-  GameState gs;
+  position::Position p;
 
   while (iss >> part) {
     parts.push_back(part);
   }
 
-  gs.board = parse_board(parts[0]);
-  gs.active = parse_active(parts[1]);
-  gs.castling = parse_castling(parts[2]);
-  gs.enps = parse_enps(parts[3]);
-  gs.halfmove_clock = parse_halfmove_clock(parts[4]);
-  gs.fullmoves = parse_fullmoves(parts[5]);
+  p.board = parseBoard(parts[0]);
+  p.colors = position::getColorBoards(p.board);
+  p.active = parseActive(parts[1]);
+  p.castling = parseCastling(parts[2]);
+  p.ep = parseEp(parts[3]);
+  p.halfmoveClock = parseHalfmoveClock(parts[4]);
+  p.fullmoves = parseFullmoves(parts[5]);
 
-  return gs;
+  return p;
 };
+
+// TODO: position to fen.
+std::string getFen(position::Position position) { return ""; };
 
 } // namespace fen

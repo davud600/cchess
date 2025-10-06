@@ -1,24 +1,23 @@
 #include "fen.h"
+#include "move.h"
+#include "position.h"
 #include "utils.h"
+#include <cstdint>
 #include <iostream>
-#include <map>
 #include <string>
-#include <vector>
 
 int main() {
-  // std::string fen =
-  //     "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
-  std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+  // std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0
+  // 1";
+
+  std::string fen = "8/8/4Q3/3NKP2/4B3/8/8/8 w - - 0 1";
   std::cout << "FEN: " << fen << "\n\n";
+  position::Position position = fen::parse(fen);
 
-  fen::GameState gs = fen::parse(fen);
-  std::cout << "Active: " << (gs.active == fen::color::white ? "w" : "b")
-            << "\n";
-  std::cout << "Castling availability: " << gs.castling << "\n";
-  std::cout << "En passant target square: " << gs.enps << "\n";
-  std::cout << "Halfmove clock: " << gs.halfmove_clock << "\n";
-  std::cout << "Fullmoves: " << gs.fullmoves << "\n";
-  utils::printBoard(gs.board);
+  // move::applyMove(&position, move::Move{0, 0});
+  // utils::printPosition(position);
 
-  return 0;
+  uint64_t kingAttacks = move::generateAttacks(position, position::Piece::King);
+  utils::printBitBoard(position.colors[0]);
+  utils::printBitBoard(kingAttacks);
 }
