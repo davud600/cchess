@@ -1,7 +1,7 @@
 #include "move.h"
 #include "position.h"
 #include <cstdint>
-#include <map>
+#include <vector>
 
 namespace move {
 
@@ -14,44 +14,98 @@ uint64_t shiftNorthEast(uint64_t b) { return (b << 9) & notAFile; };
 uint64_t shiftSouthWest(uint64_t b) { return (b >> 7) & notHFile; };
 uint64_t shiftSouthEast(uint64_t b) { return (b >> 9) & notAFile; };
 
-// TODO: modularize for colors.
-uint64_t generateAttacks(position::Position position, position::Piece piece) {
-  uint64_t initPiece =
-      position.board[position::PIECE_INDEXES.at(position::Piece::King)];
-  uint64_t attacks = 0; // init to initPiece if we want to include the piece
-                        // itself in the attack board.
-  uint64_t sameColorPieces = position.colors[0];
+uint64_t applyDirections(uint64_t piece, std::vector<Direction> directions) {
+  uint64_t attacks = 0; // init to piece if we want to include the piece
 
-  switch (piece) {
-  case position::Piece::Pawn:
-    break;
-  case position::Piece::King:
-    attacks = attacks | shiftNorth(initPiece);
-    attacks = attacks | shiftSouth(initPiece);
-    attacks = attacks | shiftWest(initPiece);
-    attacks = attacks | shiftEast(initPiece);
-    attacks = attacks | shiftNorthWest(initPiece);
-    attacks = attacks | shiftNorthEast(initPiece);
-    attacks = attacks | shiftSouthWest(initPiece);
-    attacks = attacks | shiftSouthEast(initPiece);
-    break;
-  case position::Piece::Queen:
-    break;
-  case position::Piece::Bishop:
-    break;
-  case position::Piece::Knight:
-    break;
-  case position::Piece::Rook:
-    break;
-  default:
-    break;
+  for (Direction dir : directions) {
+    switch (dir) {
+    case Direction::North:
+      attacks = attacks | shiftNorth(piece);
+      break;
+    case Direction::South:
+      attacks = attacks | shiftSouth(piece);
+      break;
+    case Direction::West:
+      attacks = attacks | shiftWest(piece);
+      break;
+    case Direction::East:
+      attacks = attacks | shiftEast(piece);
+      break;
+    case Direction::NorthWest:
+      attacks = attacks | shiftNorthWest(piece);
+      break;
+    case Direction::NorthEast:
+      attacks = attacks | shiftNorthEast(piece);
+      break;
+    case Direction::SouthWest:
+      attacks = attacks | shiftSouthWest(piece);
+      break;
+    case Direction::SouthEast:
+      attacks = attacks | shiftSouthEast(piece);
+      break;
+    }
   }
 
-  return (attacks | sameColorPieces) - sameColorPieces;
+  return attacks;
 };
 
-void applyMove(position::Position *position, Move move) {
-  // p->board[m.from] = m.to;
+uint64_t generateAttacks(position::Piece piece, uint64_t pieceB,
+                         position::Color color, uint64_t colorB) {
+  std::vector<Direction> shifts;
+
+  switch (piece) {
+  case position::Piece::Pawn: {
+    if (color == position::Color::White) {
+      shifts = std::vector<Direction>{
+          Direction::North,
+          Direction::NorthWest,
+          Direction::NorthEast,
+      };
+    } else {
+      shifts = std::vector<Direction>{
+          Direction::South,
+          Direction::SouthWest,
+          Direction::SouthEast,
+      };
+    }
+
+    break;
+  }
+  case position::Piece::King: {
+    shifts = std::vector<Direction>{Direction::North,     Direction::South,
+                                    Direction::West,      Direction::East,
+                                    Direction::NorthWest, Direction::NorthEast,
+                                    Direction::SouthWest, Direction::SouthEast};
+    break;
+  }
+  case position::Piece::Queen: {
+    shifts = std::vector<Direction>{Direction::North,     Direction::South,
+                                    Direction::West,      Direction::East,
+                                    Direction::NorthWest, Direction::NorthEast,
+                                    Direction::SouthWest, Direction::SouthEast};
+    break;
+  }
+  case position::Piece::Bishop: {
+    shifts = std::vector<Direction>{Direction::NorthWest, Direction::NorthEast,
+                                    Direction::SouthWest, Direction::SouthEast};
+    break;
+  }
+  case position::Piece::Knight: {
+    break;
+  }
+  case position::Piece::Rook: {
+    shifts = std::vector<Direction>{Direction::North, Direction::East,
+                                    Direction::South, Direction::West};
+    break;
+  }
+  default: {
+    shifts = std::vector<Direction>{};
+    break;
+  }
+  }
+
+  uint64_t attacks = applyDirections(pieceB, shifts);
+  return (attacks | colorB) - colorB;
 };
 
 } // namespace move
